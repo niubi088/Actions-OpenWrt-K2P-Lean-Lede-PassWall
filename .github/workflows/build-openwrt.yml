@@ -8,8 +8,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source code
+      - name: Checkout this repo (config)
         uses: actions/checkout@v2
+
+      - name: Clone OpenWrt source code
+        run: |
+          git clone --depth=1 https://github.com/coolsnowwolf/lede openwrt
 
       - name: Install build dependencies
         run: |
@@ -20,14 +24,18 @@ jobs:
 
       - name: Initialize feeds and install packages
         run: |
+          cd openwrt
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
       - name: Load default config and download sources
         run: |
+          cd openwrt
+          cp ../.config .config
           make defconfig
           make -j$(nproc) download
 
       - name: Build OpenWrt
         run: |
+          cd openwrt
           make -j$(nproc) V=s
